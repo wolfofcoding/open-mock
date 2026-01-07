@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState, useRef, useCallback } from "react";
-import { toPng } from 'html-to-image'; // <--- NEW LIBRARY
+import { toPng } from 'html-to-image';
 import { 
   Download, Send, User, Trash2, Upload, MessageSquare, Youtube, 
-  Monitor, Smartphone, Video, Phone, Camera, Mic, Image as ImageIcon, Smile, Menu
+  Monitor, Smartphone, Video, Phone, Camera, Mic, Image as ImageIcon, Smile, Menu,
+  XCircle, RefreshCw
 } from "lucide-react";
 
 // --- Types & Initial State ---
@@ -29,14 +30,12 @@ export default function Home() {
   const [device, setDevice] = useState<Device>("mobile");
   
   // --- CUSTOMIZATION ---
-  const [theirName, setTheirName] = useState("cryptuber");
+  const [theirName, setTheirName] = useState("Pepe");
   const [theirAvatar, setTheirAvatar] = useState("https://cdn-icons-png.flaticon.com/512/3069/3069172.png");
   const [showWatermark, setShowWatermark] = useState(true);
 
-  const [messages, setMessages] = useState<Message[]>([
-    { id: 1, text: "gm frog fam 🐸", sender: "them", timestamp: "10:00 AM" },
-    { id: 2, text: "gm! ready to post some memes?", sender: "me", timestamp: "10:01 AM" },
-  ]);
+  // --- UPDATED: Start with an EMPTY chat ---
+  const [messages, setMessages] = useState<Message[]>([]);
   
   const [inputText, setInputText] = useState("");
   const chatRef = useRef<HTMLDivElement>(null);
@@ -53,22 +52,26 @@ export default function Home() {
     setMessages(messages.filter((m) => m.id !== id));
   };
 
+  const clearAllMessages = () => {
+    if(confirm("Are you sure you want to clear all messages?")) {
+        setMessages([]);
+    }
+  };
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setTheirAvatar(URL.createObjectURL(e.target.files[0]));
     }
   };
 
-  // --- NEW DOWNLOAD FUNCTION (Fixes the Error) ---
+  // --- Download Function ---
   const downloadImage = useCallback(async () => {
     if (chatRef.current === null) {
       return;
     }
 
     try {
-      // Small delay to ensure rendering is done
       await new Promise(resolve => setTimeout(resolve, 100));
-      
       const dataUrl = await toPng(chatRef.current, { cacheBust: true, pixelRatio: 2 });
       const link = document.createElement('a');
       link.download = `mockchat-${theme}.png`;
@@ -82,7 +85,7 @@ export default function Home() {
 
   // --- Theme Styles Config ---
   const getThemeStyles = () => {
-    const commonBubble = "relative max-w-[85%] px-3 py-2 text-[15px] leading-5 shadow-sm break-words transition-all";
+    const commonBubble = "relative max-w-[85%] px-3 py-2 text-[15px] leading-5 shadow-sm break-words transition-all group";
     
     switch (theme) {
       // --- BUBBLE LAYOUTS ---
@@ -238,6 +241,7 @@ export default function Home() {
           </div>
         </div>
         
+        {/* Themes */}
         <div className="space-y-2">
           <label className="text-xs uppercase tracking-wider font-semibold text-neutral-400">Theme Style ({themeList.length})</label>
           <div className="grid grid-cols-3 gap-2 max-h-[200px] overflow-y-auto custom-scrollbar pr-2">
@@ -247,6 +251,7 @@ export default function Home() {
           </div>
         </div>
 
+        {/* Character Info */}
         <div className="space-y-2 border-t border-neutral-700 pt-4">
           <label className="text-xs uppercase tracking-wider font-semibold text-neutral-400">Character Info</label>
           <div className="flex gap-2">
@@ -263,8 +268,13 @@ export default function Home() {
            <label className="text-sm text-gray-300 select-none">Show Cryptuber Watermark</label>
         </div>
 
+        {/* Conversation Controls */}
         <div className="space-y-2 border-t border-neutral-700 pt-4">
-          <label className="text-xs uppercase tracking-wider font-semibold text-neutral-400">Conversation</label>
+          <div className="flex justify-between items-center">
+             <label className="text-xs uppercase tracking-wider font-semibold text-neutral-400">Conversation</label>
+             <button onClick={clearAllMessages} className="text-xs text-red-400 hover:text-red-300 flex items-center gap-1"><Trash2 size={12}/> Clear All</button>
+          </div>
+          
           <textarea value={inputText} onChange={(e) => setInputText(e.target.value)} onKeyDown={(e) => { if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); addMessage("me"); }}} className="w-full bg-neutral-900 border border-neutral-600 rounded px-3 py-2 min-h-[100px] focus:outline-none focus:border-green-500 transition-colors text-sm" placeholder="Type a message..." />
           <div className="flex gap-2">
             <button onClick={() => addMessage("them")} className="flex-1 bg-neutral-700 hover:bg-neutral-600 border border-neutral-600 py-2 rounded text-sm font-medium flex items-center justify-center gap-2 transition-all"><User size={16} /> Them</button>
@@ -313,6 +323,15 @@ export default function Home() {
           <div className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar relative bg-repeat" style={{backgroundImage: theme === 'whatsapp' ? 'url("https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png")' : 'none', backgroundSize: '400px'}}>
             {showWatermark && <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03]"><span className="text-4xl font-black -rotate-45">CRYPTUBER</span></div>}
 
+            {/* EMPTY STATE MSG */}
+            {messages.length === 0 && (
+                <div className="flex flex-col items-center justify-center h-full opacity-30 text-center px-8 gap-2">
+                    <MessageSquare size={48} />
+                    <p className="text-sm font-medium">No messages yet.</p>
+                    <p className="text-xs">Type in the sidebar to start chatting!</p>
+                </div>
+            )}
+
             {messages.map((msg) => {
               // Avatar Row Layout
               if (styles.layout === "avatar-row") {
@@ -323,6 +342,7 @@ export default function Home() {
                 
                 return (
                   <div key={msg.id} className={`flex gap-3 group p-1 -mx-2 px-2 relative mt-2 ${isDiscord ? "hover:bg-black/5" : ""}`}>
+                    <button onClick={() => deleteMessage(msg.id)} className="absolute right-2 top-2 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity bg-neutral-800 p-1 rounded z-20 cursor-pointer"><Trash2 size={12} /></button>
                     <div className="w-10 h-10 rounded-full bg-gray-500 overflow-hidden shrink-0 mt-0.5">
                       {msg.sender === "them" ? <img src={theirAvatar} className="w-full h-full object-cover" /> : <div className={`w-full h-full flex items-center justify-center text-[10px] font-bold text-white ${isDiscord ? 'bg-[#5865F2]' : 'bg-blue-600'}`}>ME</div>}
                     </div>
@@ -344,7 +364,16 @@ export default function Home() {
               return (
                 <div key={msg.id} className={`flex w-full group ${isMe ? "justify-end" : "justify-start"} mb-1`}>
                    {showAvatar && <img src={theirAvatar} className="w-8 h-8 rounded-full object-cover mr-2 self-end mb-[2px]" />}
-                   <div className={`group-hover:brightness-95 ${isMe ? styles.meBubble : styles.themBubble}`}>
+                   <div className={`${isMe ? styles.meBubble : styles.themBubble}`}>
+                      {/* DELETE BUTTON - Always visible on Hover */}
+                      <button 
+                        onClick={() => deleteMessage(msg.id)}
+                        className="absolute -top-3 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm z-20 cursor-pointer text-xs font-bold"
+                        title="Delete Message"
+                      >
+                        ×
+                      </button>
+
                       <p>{msg.text}</p>
                       {theme !== 'messenger' && theme !== 'instagram' && theme !== 'snapchat' && (
                         <span className={`text-[10px] block text-right mt-1 select-none ${theme === 'imessage' && isMe ? 'text-blue-100' : 'opacity-60'}`}>{msg.timestamp}</span>
