@@ -31,12 +31,12 @@ export default function Home() {
   
   // --- CUSTOMIZATION ---
   const [theirName, setTheirName] = useState("cryptuber");
-  const [theirAvatar, setTheirAvatar] = useState("https://cdn-icons-png.flaticon.com/512/3069/3069172.png");
-  const [showWatermark, setShowWatermark] = useState(true);
-
-  // --- UPDATED: Start with an EMPTY chat ---
-  const [messages, setMessages] = useState<Message[]>([]);
   
+  // FIX 1: Use a "Data URI" instead of an external URL. This is safe and won't crash.
+  const [theirAvatar, setTheirAvatar] = useState("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM0Q0RCOTUiLz48cGF0aCBkPSJNMTAsMTIgQTEsMSAwIDAsMSAxMiwxMiBNMjAsMTIgQTEsMSAwIDAsMSAyMiwxMiIgZmlsbD0iIzMzMyIvPjxwYXRoIGQ9Ik0xMCwyMCBRMTYsMjYgMjIsMjAiIHN0cm9rZT0iIzMzMyIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+PC9zdmc+");
+  
+  const [showWatermark, setShowWatermark] = useState(true);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState("");
   const chatRef = useRef<HTMLDivElement>(null);
 
@@ -60,26 +60,32 @@ export default function Home() {
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
+      // Local uploads are SAFE (Blob URL)
       setTheirAvatar(URL.createObjectURL(e.target.files[0]));
     }
   };
 
-  // --- Download Function ---
+  // --- Download Function (Updated config) ---
   const downloadImage = useCallback(async () => {
-    if (chatRef.current === null) {
-      return;
-    }
+    if (chatRef.current === null) return;
 
     try {
+      // Small delay to ensure rendering is done
       await new Promise(resolve => setTimeout(resolve, 100));
-      const dataUrl = await toPng(chatRef.current, { cacheBust: true, pixelRatio: 2 });
+      
+      const dataUrl = await toPng(chatRef.current, { 
+        cacheBust: true, 
+        pixelRatio: 2,
+        skipAutoScale: true
+      });
+      
       const link = document.createElement('a');
       link.download = `mockchat-${theme}.png`;
       link.href = dataUrl;
       link.click();
     } catch (err) {
       console.error("Failed to download image", err);
-      alert("Error generating image. Please try again.");
+      alert("Error generating image. Try uploading a custom avatar image.");
     }
   }, [chatRef, theme]);
 
@@ -88,7 +94,6 @@ export default function Home() {
     const commonBubble = "relative max-w-[85%] px-3 py-2 text-[15px] leading-5 shadow-sm break-words transition-all group";
     
     switch (theme) {
-      // --- BUBBLE LAYOUTS ---
       case "whatsapp":
         return {
           container: "bg-[#e5ddd5] font-sans",
@@ -319,8 +324,15 @@ export default function Home() {
               </div>
           </div>
 
-          {/* MESSAGES */}
-          <div className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar relative bg-repeat" style={{backgroundImage: theme === 'whatsapp' ? 'url("https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png")' : 'none', backgroundSize: '400px'}}>
+          {/* MESSAGES - FIX 2: Replaced external background image with a safe CSS pattern */}
+          <div 
+             className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar relative"
+             style={{
+                backgroundImage: theme === 'whatsapp' ? 'radial-gradient(#cbd5e1 1px, transparent 1px)' : 'none', 
+                backgroundSize: '20px 20px',
+                opacity: 1
+             }}
+          >
             {showWatermark && <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03]"><span className="text-4xl font-black -rotate-45">CRYPTUBER</span></div>}
 
             {/* EMPTY STATE MSG */}
@@ -365,11 +377,10 @@ export default function Home() {
                 <div key={msg.id} className={`flex w-full group ${isMe ? "justify-end" : "justify-start"} mb-1`}>
                    {showAvatar && <img src={theirAvatar} className="w-8 h-8 rounded-full object-cover mr-2 self-end mb-[2px]" />}
                    <div className={`${isMe ? styles.meBubble : styles.themBubble}`}>
-                      {/* DELETE BUTTON - Always visible on Hover */}
+                      {/* DELETE BUTTON */}
                       <button 
                         onClick={() => deleteMessage(msg.id)}
                         className="absolute -top-3 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm z-20 cursor-pointer text-xs font-bold"
-                        title="Delete Message"
                       >
                         ×
                       </button>
@@ -403,7 +414,7 @@ export default function Home() {
                         <Smile size={16} className="opacity-50" />
                     </div>
 
-                    {/* Camera/Mic Icons */}
+                    {/* Icons */}
                     {theme !== 'imessage' && (
                         <div className="flex gap-3 text-gray-400">
                             {theme === 'whatsapp' && <Camera size={20} />}
