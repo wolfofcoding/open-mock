@@ -30,7 +30,7 @@ export default function Home() {
   const [device, setDevice] = useState<Device>("mobile");
   
   // --- CUSTOMIZATION ---
-  const [theirName, setTheirName] = useState("crptuber");
+  const [theirName, setTheirName] = useState("cryptuber");
   
   // SAFE FROG AVATAR (Built-in SVG)
   const [theirAvatar, setTheirAvatar] = useState("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzAiIGZpbGw9IiM0Q0RCOTUiLz48Y2lyY2xlIGN4PSIyMCIgY3k9IjI0IiByPSI1IiBmaWxsPSIjMzMzIi8+PGNpcmNsZSBjeD0iNDQiIGN5PSIyNCIgcj0iNSIgZmlsbD0iIzMzMyIvPjxwYXRoIGQ9Ik0yMCAzOCBRMzIgNTIgNDQgMzgiIHN0cm9rZT0iIzMzMyIgc3Ryb2tlLXdpZHRoPSIzIiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48L3N2Zz4=");
@@ -64,6 +64,7 @@ export default function Home() {
     }
   };
 
+  // --- DOWNLOAD FUNCTION (FIXED) ---
   const downloadImage = useCallback(async () => {
     if (chatRef.current === null) return;
 
@@ -72,11 +73,11 @@ export default function Home() {
       await new Promise(resolve => setTimeout(resolve, 200));
       
       // 2. Capture the image
+      // I REMOVED 'backgroundColor' entirely. This forces the image to be opaque/solid.
       const dataUrl = await toPng(chatRef.current, { 
-        cacheBust: false, // <--- FIXED: Must be FALSE to support custom uploads
+        cacheBust: false, 
         pixelRatio: 2,
-        skipAutoScale: true,
-        backgroundColor: 'transparent'
+        skipAutoScale: true
       });
       
       const link = document.createElement('a');
