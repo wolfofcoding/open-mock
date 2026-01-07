@@ -30,7 +30,7 @@ export default function Home() {
   const [device, setDevice] = useState<Device>("mobile");
   
   // --- CUSTOMIZATION ---
-  const [theirName, setTheirName] = useState("Pepe");
+  const [theirName, setTheirName] = useState("crptuber");
   
   // SAFE FROG AVATAR (Built-in SVG)
   const [theirAvatar, setTheirAvatar] = useState("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzAiIGZpbGw9IiM0Q0RCOTUiLz48Y2lyY2xlIGN4PSIyMCIgY3k9IjI0IiByPSI1IiBmaWxsPSIjMzMzIi8+PGNpcmNsZSBjeD0iNDQiIGN5PSIyNCIgcj0iNSIgZmlsbD0iIzMzMyIvPjxwYXRoIGQ9Ik0yMCAzOCBRMzIgNTIgNDQgMzgiIHN0cm9rZT0iIzMzMyIgc3Ryb2tlLXdpZHRoPSIzIiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48L3N2Zz4=");
