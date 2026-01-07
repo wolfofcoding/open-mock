@@ -30,7 +30,7 @@ export default function Home() {
   const [device, setDevice] = useState<Device>("mobile");
   
   // --- CUSTOMIZATION ---
-  const [theirName, setTheirName] = useState("Pepe");
+  const [theirName, setTheirName] = useState("cryptuber");
   const [theirAvatar, setTheirAvatar] = useState("https://cdn-icons-png.flaticon.com/512/3069/3069172.png");
   const [showWatermark, setShowWatermark] = useState(true);
 
