@@ -32,8 +32,8 @@ export default function Home() {
   // --- CUSTOMIZATION ---
   const [theirName, setTheirName] = useState("cryptuber");
   
-  // FIX 1: Use a "Data URI" instead of an external URL. This is safe and won't crash.
-  const [theirAvatar, setTheirAvatar] = useState("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiM0Q0RCOTUiLz48cGF0aCBkPSJNMTAsMTIgQTEsMSAwIDAsMSAxMiwxMiBNMjAsMTIgQTEsMSAwIDAsMSAyMiwxMiIgZmlsbD0iIzMzMyIvPjxwYXRoIGQ9Ik0xMCwyMCBRMTYsMjYgMjIsMjAiIHN0cm9rZT0iIzMzMyIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+PC9zdmc+");
+  // SAFE FROG AVATAR (Built-in)
+  const [theirAvatar, setTheirAvatar] = useState("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzAiIGZpbGw9IiM0Q0RCOTUiLz48Y2lyY2xlIGN4PSIyMCIgY3k9IjI0IiByPSI1IiBmaWxsPSIjMzMzIi8+PGNpcmNsZSBjeD0iNDQiIGN5PSIyNCIgcj0iNSIgZmlsbD0iIzMzMyIvPjxwYXRoIGQ9Ik0yMCAzOCBRMzIgNTIgNDQgMzgiIHN0cm9rZT0iIzMzMyIgc3Ryb2tlLXdpZHRoPSIzIiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48L3N2Zz4=");
   
   const [showWatermark, setShowWatermark] = useState(true);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -60,23 +60,21 @@ export default function Home() {
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      // Local uploads are SAFE (Blob URL)
       setTheirAvatar(URL.createObjectURL(e.target.files[0]));
     }
   };
 
-  // --- Download Function (Updated config) ---
   const downloadImage = useCallback(async () => {
     if (chatRef.current === null) return;
 
     try {
-      // Small delay to ensure rendering is done
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 200));
       
       const dataUrl = await toPng(chatRef.current, { 
         cacheBust: true, 
         pixelRatio: 2,
-        skipAutoScale: true
+        skipAutoScale: true,
+        backgroundColor: 'transparent' // FIXED: Changed 'null' to 'transparent'
       });
       
       const link = document.createElement('a');
@@ -85,7 +83,7 @@ export default function Home() {
       link.click();
     } catch (err) {
       console.error("Failed to download image", err);
-      alert("Error generating image. Try uploading a custom avatar image.");
+      alert("Still having trouble? Try uploading a photo from your computer instead of using the default one.");
     }
   }, [chatRef, theme]);
 
@@ -324,7 +322,7 @@ export default function Home() {
               </div>
           </div>
 
-          {/* MESSAGES - FIX 2: Replaced external background image with a safe CSS pattern */}
+          {/* MESSAGES - Safe Pattern Background */}
           <div 
              className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar relative"
              style={{
